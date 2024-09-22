@@ -28,7 +28,7 @@ public class ChatServer extends Chat {
                         chatMessages2.add(message); // Fügt zur zweiten Chatbox hinzu
                     });
 
-                    String response = "message have been received: " + message;
+                    String response = "message have been received by Host" + message;
                     byte[] responseData = response.getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(
                             responseData,

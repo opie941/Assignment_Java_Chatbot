@@ -20,6 +20,8 @@ import javafx.scene.input.KeyCode;
 
 public class Chat extends Application {
 
+    public String nameClient1 = "Chat-Client-1";
+    public String nameClient2 = "Chat-Client-2";
     private static final int CLIENT_PORT = 1234; // Anderer Port für den Client
 
     private final int WIDTH = 300;
@@ -42,11 +44,12 @@ public class Chat extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Chat-Client-1");
+
+        primaryStage.setTitle(nameClient1);
         setupChatWindow(primaryStage, textfield1, chat_button1, delete_button1, chatBox1, chatMessages1, "Chatfenster 1");
 
         Stage secondStage = new Stage();
-        secondStage.setTitle("Chat-Client-2");
+        secondStage.setTitle(nameClient2);
         setupChatWindow(secondStage, textfield2, chat_button2, delete_button2, chatBox2, chatMessages2, "Chatfenster 2");
 
         startTextMonitoring();
@@ -97,12 +100,12 @@ public class Chat extends Application {
                 System.out.println("Message has been sent from Client");
 
 
-                /*
+
                 // Nachricht in beiden Chat-Boxen anzeigen
                 chatMessages1.add(message);
                 chatMessages2.add(message);
 
-                */
+
                 socket.close();
             } catch (Exception e) {
                 e.printStackTrace();
