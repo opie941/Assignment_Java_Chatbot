@@ -18,8 +18,8 @@ import javafx.application.Platform;
 
 public class Chat2 extends Application {
 
-    public String nameClient = "Chat-Client1";
-    private static final int CLIENT_PORT = 1234; // Port für den Client
+    public String nameClient = "Chat-Client";
+    private static final int CLIENT_PORT = 1235;  // Port für den Client (individuell für jeden Client)
 
     private final int WIDTH = 300;
     private final int HEIGHT = 200;
@@ -68,26 +68,22 @@ public class Chat2 extends Application {
 
     public void send_message_via_click(String message) {
         if (!message.isEmpty()) {
-            new Thread(() -> { // Senden in einem neuen Thread
+            new Thread(() -> {
                 try {
                     DatagramSocket socket = new DatagramSocket();
                     byte[] buffer = message.getBytes();
 
-                    String serverIp = getServerIp();  // IP-Adresse des Servers erfragen
+                    // Server-IP-Adresse und Port
+                    String serverIp = getServerIp();
                     InetAddress serverAddress = InetAddress.getByName(serverIp);
-                    int port = ChatServer2.SERVER_PORT; // Port des Servers
+                    int port = ChatServer2.SERVER_PORT; // Server-Port
 
                     DatagramPacket pack = new DatagramPacket(buffer, buffer.length, serverAddress, port);
                     socket.send(pack);
-                    System.out.println("Message has been sent from Client: " + nameClient + ": " + message);
+                    System.out.println("Message sent from client: " + nameClient + ": " + message);
 
-                    // Antwort vom Server empfangen
-                    byte[] receiveBuffer = new byte[1024];
-                    DatagramPacket responsePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-                    socket.receive(responsePacket); // Antwort vom Server empfangen
-
-                    String responseMessage = new String(responsePacket.getData(), 0, responsePacket.getLength());
-                    Platform.runLater(() -> chatMessages.add(responseMessage)); // UI-Update
+                    // Lokale Nachricht anzeigen, bevor Antwort vom Server kommt
+                    Platform.runLater(() -> chatMessages.add("You: " + message));
 
                     socket.close();
                 } catch (Exception e) {
@@ -99,10 +95,10 @@ public class Chat2 extends Application {
 
     // Server IP dynamisch erfragen
     private String getServerIp() {
-        return "localhost"; // Ändere das für echte Netzwerke oder nimm eine Benutzereingabe
+        return "localhost"; // Ändere dies für die tatsächliche Netzwerkverbindung
     }
 
-    // Startet einen neuen Thread, der auf Nachrichten vom Server wartet (kann erweitert werden)
+    // Startet einen neuen Thread, der auf Nachrichten vom Server wartet
     private void startReceivingMessages() {
         new Thread(() -> {
             try {
