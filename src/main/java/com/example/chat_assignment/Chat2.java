@@ -19,7 +19,7 @@ import javafx.application.Platform;
 public class Chat2 extends Application {
 
     public String nameClient = "Chat-Client";
-    private static final int CLIENT_PORT = 1235;  // Port für den Client (individuell für jeden Client)
+    private static final int CLIENT_PORT = 1234;  // Port für den Client (individuell für jeden Client)
 
     private final int WIDTH = 300;
     private final int HEIGHT = 200;
