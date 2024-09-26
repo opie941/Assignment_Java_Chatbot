@@ -11,8 +11,8 @@ public class ChatServer2 {
 
     public static final int SERVER_PORT = 1234;
 
-    // Liste der verbundenen Clients (IP-Adresse und Port)
-    private static List<InetSocketAddress> clientList = new ArrayList<>();
+    // Liste als String-Adressen speichern, um Vergleich zu erleichtern
+    private static List<String> clientList = new ArrayList<>();
 
     public static void main(String[] args) {
         new Thread(() -> {
@@ -25,29 +25,34 @@ public class ChatServer2 {
                     DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
                     serverSocket.receive(receivePacket);  // Nachricht vom Client empfangen
 
-                    // Nachricht in String umwandeln
-                    String message = new String(receivePacket.getData(), 0, receivePacket.getLength());
-                    InetSocketAddress clientAddress = new InetSocketAddress(receivePacket.getAddress(), receivePacket.getPort());
-
-                    System.out.println("Message from client: " + message);
+                    // Client-Adresse als String
+                    String clientAddressString = receivePacket.getAddress().toString() + ":" + receivePacket.getPort();
+                    System.out.println("Message from client: " + clientAddressString);
 
                     // Adresse des Clients speichern, falls nicht schon vorhanden
-                    if (!clientList.contains(clientAddress)) {
-                        clientList.add(clientAddress);
+                    if (!clientList.contains(clientAddressString)) {
+                        clientList.add(clientAddressString);
+                        System.out.println("New client added: " + clientAddressString);
                     }
 
                     // Nachricht an alle Clients weiterleiten
-                    String response = "Client " + clientAddress + ": " + message;
+                    String message = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                    String response = "Client " + clientAddressString + ": " + message;
                     byte[] responseData = response.getBytes();
 
-                    for (InetSocketAddress client : clientList) {
+                    for (String client : clientList) {
+                        String[] parts = client.split(":");
+                        InetAddress clientInetAddress = InetAddress.getByName(parts[0].substring(1)); // IP ohne Slash
+                        int clientPort = Integer.parseInt(parts[1]);
+
                         DatagramPacket sendPacket = new DatagramPacket(
                                 responseData,
                                 responseData.length,
-                                client.getAddress(),
-                                client.getPort()
+                                clientInetAddress,
+                                clientPort
                         );
                         serverSocket.send(sendPacket);  // Nachricht an alle Clients senden
+                        System.out.println("Message has been sent back to: " + client);
                     }
                 }
             } catch (Exception e) {

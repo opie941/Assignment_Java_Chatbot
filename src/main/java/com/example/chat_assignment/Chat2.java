@@ -18,8 +18,10 @@ import javafx.application.Platform;
 
 public class Chat2 extends Application {
 
-    public String nameClient = "Chat-Client";
-    private static final int CLIENT_PORT = 1234;  // Port für den Client (individuell für jeden Client)
+    private DatagramSocket socket; // Gemeinsamer Socket für Senden und Empfangen
+
+    public String nameClient = "Chat-Client1";
+    private static final int CLIENT_PORT = 12345;  // Fester Port für den Client
 
     private final int WIDTH = 300;
     private final int HEIGHT = 200;
@@ -34,6 +36,11 @@ public class Chat2 extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        try {
+            socket = new DatagramSocket(CLIENT_PORT);  // Socket beim Start erstellen
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         primaryStage.setTitle(nameClient);
         setupChatWindow(primaryStage, textfield, chat_button, delete_button, chatBox, chatMessages, "MyChat");
@@ -70,7 +77,6 @@ public class Chat2 extends Application {
         if (!message.isEmpty()) {
             new Thread(() -> {
                 try {
-                    DatagramSocket socket = new DatagramSocket();
                     byte[] buffer = message.getBytes();
 
                     // Server-IP-Adresse und Port
@@ -79,13 +85,12 @@ public class Chat2 extends Application {
                     int port = ChatServer2.SERVER_PORT; // Server-Port
 
                     DatagramPacket pack = new DatagramPacket(buffer, buffer.length, serverAddress, port);
-                    socket.send(pack);
+                    socket.send(pack); // Benutze den gemeinsamen Socket
                     System.out.println("Message sent from client: " + nameClient + ": " + message);
 
                     // Lokale Nachricht anzeigen, bevor Antwort vom Server kommt
                     Platform.runLater(() -> chatMessages.add("You: " + message));
 
-                    socket.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -95,19 +100,20 @@ public class Chat2 extends Application {
 
     // Server IP dynamisch erfragen
     private String getServerIp() {
-        return "192.168.0.193"; // Ändere dies für die tatsächliche Netzwerkverbindung
+        return "localhost"; // Ändere dies für die tatsächliche Netzwerkverbindung
     }
 
     // Startet einen neuen Thread, der auf Nachrichten vom Server wartet
     private void startReceivingMessages() {
         new Thread(() -> {
             try {
-                DatagramSocket socket = new DatagramSocket(CLIENT_PORT);
                 byte[] buffer = new byte[1024];
+                System.out.println("Client is ready to receive messages...");
 
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet); // Nachricht vom Server empfangen
+                    System.out.println(nameClient + " : Received message back from Server...");
 
                     String message = new String(packet.getData(), 0, packet.getLength());
                     Platform.runLater(() -> chatMessages.add(message)); // UI-Update
