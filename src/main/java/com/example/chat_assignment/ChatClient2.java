@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.net.DatagramPacket;
@@ -20,9 +21,10 @@ public class ChatClient2 extends Application {
 
     private DatagramSocket socket; // socket for sending and receiving
 
-    public String nameClient = "Chat-Client: Huber";
-    private static final int CLIENT_PORT = 12346;  // Hard coded port for Client2
+    public String nameClient = "Huber";
+    private static final int CLIENT_PORT = 12346;  // Hard coded port for Client1
 
+    //Size of window of GUI
     private final int WIDTH = 300;
     private final int HEIGHT = 200;
 
@@ -45,8 +47,7 @@ public class ChatClient2 extends Application {
         primaryStage.setTitle(nameClient);
         setupChatWindow(primaryStage, textfield, chat_button, delete_button, chatBox, chatMessages, "MyChat");
 
-        startReceivingMessages(); // starts receiving messages back from the server 
-    }
+        startReceivingMessages(); // starts receiving messages back from the server
     }
 
     private void setupChatWindow(Stage stage, TextField textField, Button sendButton, Button deleteButton, ListView<String> chatBox, ObservableList<String> chatMessages, String title) {
@@ -57,9 +58,18 @@ public class ChatClient2 extends Application {
             textField.clear(); // textfield will be cleared after sending.
         });
 
+
+        textField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                send_message_via_click(textField.getText()); // Nachricht senden
+                textField.clear(); // Nach dem Senden Textfeld leeren
+            }
+        });
+
+
         deleteButton.setOnAction(event -> {
-            chatMessages.clear(); // all messages in textfield will be closed 
-            textField.clear();    
+            chatMessages.clear(); // all messages in textfield will be closed
+            textField.clear();
         });
 
         ScrollPane scrollPane = new ScrollPane(chatBox);
@@ -83,14 +93,12 @@ public class ChatClient2 extends Application {
                     // Server-IP-Adresse and Port
                     String serverIp = getServerIp();
                     InetAddress serverAddress = InetAddress.getByName(serverIp);
-                    int port = ChatServer2.SERVER_PORT; // Server-Port
+                    int port = com.example.chat_assignment.ChatServer_old.SERVER_PORT; // Server-Port
 
                     DatagramPacket pack = new DatagramPacket(buffer, buffer.length, serverAddress, port);
-                    socket.send(pack); 
-                    System.out.println("Message sent from client: " + nameClient + ": " + message);
+                    socket.send(pack);
+                    System.out.println(nameClient + ": " + message);
 
-                    
-                    Platform.runLater(() -> chatMessages.add("You: " + message));
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -104,17 +112,17 @@ public class ChatClient2 extends Application {
         return "localhost"; // should be different in another network especially if its not local
     }
 
-    // Starts a mew Thread, which is waiting for sent back messages of the server -> client 
+    // Starts a mew Thread, which is waiting for sent back messages of the server -> client
     private void startReceivingMessages() {
         new Thread(() -> {
             try {
                 byte[] buffer = new byte[1024];
-                System.out.println("Client is ready to receive messages...");
+                System.out.println(nameClient + " is ready to receive messages...");
 
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(packet); // Message receriving from server 
-                    System.out.println(nameClient + " : Received message back from Server...");
+                    socket.receive(packet); // Message receriving from server
+
 
                     String message = new String(packet.getData(), 0, packet.getLength());
                     Platform.runLater(() -> chatMessages.add(message)); // Updates GUI

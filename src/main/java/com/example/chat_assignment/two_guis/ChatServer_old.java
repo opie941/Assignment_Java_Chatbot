@@ -5,7 +5,7 @@ import javafx.application.Platform;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class ChatServer extends Chat {
+public class ChatServer_old extends Chat {
 
     public static final int SERVER_PORT = 1234;
 

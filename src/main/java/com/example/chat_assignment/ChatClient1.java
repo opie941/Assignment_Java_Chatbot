@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.net.DatagramPacket;
@@ -20,7 +21,7 @@ public class ChatClient1 extends Application {
 
     private DatagramSocket socket; // socket for sending and receiving
 
-    public String nameClient = "Chat-Client: Müller";
+    public String nameClient = "Müller";
     private static final int CLIENT_PORT = 12345;  // Hard coded port for Client1
 
 	//Size of window of GUI
@@ -57,6 +58,15 @@ public class ChatClient1 extends Application {
             textField.clear(); // textfield will be cleared after sending.
         });
 
+
+        textField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                send_message_via_click(textField.getText()); // Nachricht senden
+                textField.clear(); // Nach dem Senden Textfeld leeren
+            }
+        });
+
+
         deleteButton.setOnAction(event -> {
             chatMessages.clear(); // all messages in textfield will be closed 
             textField.clear();   
@@ -83,14 +93,12 @@ public class ChatClient1 extends Application {
                     // Server-IP-Adresse and Port
                     String serverIp = getServerIp();
                     InetAddress serverAddress = InetAddress.getByName(serverIp);
-                    int port = ChatServer2.SERVER_PORT; // Server-Port
+                    int port = ChatServer.SERVER_PORT; // Server-Port
 
                     DatagramPacket pack = new DatagramPacket(buffer, buffer.length, serverAddress, port);
                     socket.send(pack); 
-                    System.out.println("Message sent from client: " + nameClient + ": " + message);
+                    System.out.println(nameClient + ": " + message);
 
-                    
-                    Platform.runLater(() -> chatMessages.add("You: " + message));
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -109,12 +117,12 @@ public class ChatClient1 extends Application {
         new Thread(() -> {
             try {
                 byte[] buffer = new byte[1024];
-                System.out.println("Client is ready to receive messages...");
+                System.out.println(nameClient + " is ready to receive messages...");
 
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet); // Message receriving from server 
-                    System.out.println(nameClient + " : Received message back from Server...");
+
 
                     String message = new String(packet.getData(), 0, packet.getLength());
                     Platform.runLater(() -> chatMessages.add(message)); // Updates GUI

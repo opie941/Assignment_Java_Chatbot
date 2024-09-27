@@ -3,43 +3,49 @@ package com.example.chat_assignment;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatServer {
-	
-	//Server-PortNumber as int 
+
+    //Server-PortNumber as an int
     public static final int SERVER_PORT = 1234;
 
-    // ClientListe as an Array 
+    // ClientListe as an Array
     private static List<String> clientList = new ArrayList<>();
 
+
     public static void main(String[] args) {
-		//new Thread for the Datagram
+        //new Thread for the Datagram
+
+        clientList.add("/127.0.0.1:12345");  // Beispiel-Client 1
+        clientList.add("/127.0.0.1:12346");  // Beispiel-Client 2
+
         new Thread(() -> {
             try {
+
                 DatagramSocket serverSocket = new DatagramSocket(SERVER_PORT);
                 byte[] receiveBuffer = new byte[1024];
-                System.out.println("Server is running on Port: " + SERVER_PORT);
+                System.out.println("Server is running on local Port: " + SERVER_PORT);
 
                 while (true) {
                     DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-                    serverSocket.receive(receivePacket);  // waiting for messenges of the client
+                    serverSocket.receive(receivePacket);  // waiting for messages of the client
+                    System.out.println("Waiting for messages of a client.");
 
-                    // Client adresses as String 
+                    // Client address as String
                     String clientAddress = receivePacket.getAddress().toString() + ":" + receivePacket.getPort();
-                    System.out.println("Message was received from a client : " + clientAddress);
-
-                    // Adresse des Clients speichern, falls nicht schon vorhanden
                     if (!clientList.contains(clientAddress)) {
                         clientList.add(clientAddress);
-                        System.out.println("New client added to clientlist: " + clientAddress);
+                        System.out.println("New client added to client list: " + clientAddress);
+                        System.out.println("Actual client list: " + clientList);
                     }
 
                     // Nachricht an alle Clients weiterleiten
                     String message = new String(receivePacket.getData(), 0, receivePacket.getLength());
-                    String response = "Client " + clientAddress + ": " + message;
+                    System.out.println("Received message: " + message);
+
+                    String response = "Chatpartner: " + message;
                     byte[] responseData = response.getBytes();
 
                     for (String client : clientList) {
@@ -54,7 +60,6 @@ public class ChatServer {
                                 clientPort
                         );
                         serverSocket.send(sendPacket);  // Nachricht an alle Clients senden
-                        System.out.println("Message has been sent back to: " + client);
                     }
                 }
             } catch (Exception e) {

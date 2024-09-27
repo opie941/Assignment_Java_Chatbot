@@ -14,7 +14,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Label;
 import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 
@@ -93,7 +92,7 @@ public class Chat extends Application {
                 DatagramSocket socket = new DatagramSocket();
                 byte[] buffer = message.getBytes();
                 InetAddress serverAddress = InetAddress.getByName("localhost");
-                int port = ChatServer.SERVER_PORT; // Port des Servers
+                int port = ChatServer_old.SERVER_PORT; // Port des Servers
 
                 DatagramPacket pack = new DatagramPacket(buffer, buffer.length, serverAddress, port);
                 socket.send(pack);
