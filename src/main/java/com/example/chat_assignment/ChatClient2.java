@@ -114,6 +114,7 @@ public class ChatClient2 extends Application {
 
     // Starts a mew Thread, which is waiting for sent back messages of the server -> client
     private void startReceivingMessages() {
+
         new Thread(() -> {
             try {
                 byte[] buffer = new byte[1024];

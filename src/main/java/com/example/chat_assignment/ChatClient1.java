@@ -114,6 +114,7 @@ public class ChatClient1 extends Application {
 
     // Starts a mew Thread, which is waiting for sent back messages of the server -> client 
     private void startReceivingMessages() {
+
         new Thread(() -> {
             try {
                 byte[] buffer = new byte[1024];
@@ -121,7 +122,7 @@ public class ChatClient1 extends Application {
 
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(packet); // Message receriving from server 
+                    socket.receive(packet); // Message receriving from server
 
 
                     String message = new String(packet.getData(), 0, packet.getLength());
