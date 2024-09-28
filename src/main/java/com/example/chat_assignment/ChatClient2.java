@@ -17,87 +17,110 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.application.Platform;
 
+
+//Class for a chat client which extends application
 public class ChatClient2 extends Application {
 
-    private DatagramSocket socket; // socket for sending and receiving
+    //Defines a datagram-socket
+    private DatagramSocket SOCKET;
 
-    public String nameClient = "Huber";
-    private static final int CLIENT_PORT = 12346;  // Hard coded port for Client1
+    //Hard coded name of the chat client
+    public String CLIENT_NAME = "Huber";
 
-    //Size of window of GUI
+    //Hard coded port of the chat client #exampleport
+    private static final int CLIENT_PORT = 12346;
+
+    //Set the height and the width of the gui
     private final int WIDTH = 300;
     private final int HEIGHT = 200;
 
-    private TextField textfield = new TextField();
-    private Button chat_button = new Button("Send Message...");
-    private Button delete_button = new Button("Delete Chat");
+    //Initiates elements of the GUI: Textfield for entering text, buttons the send and delete messages
+    private TextField TEXTFIELD = new TextField();
+    private Button CHAT_BUTTON = new Button("Send Message...");
+    private Button DELETE_BUTTON = new Button("Delete Chat");
 
-    // ListView und ObservableList for the Chatmessages
-    public ListView<String> chatBox = new ListView<>();
-    public static ObservableList<String> chatMessages = FXCollections.observableArrayList();
 
+    // Creates new elements for the chatbox and chatmessages
+    public ListView<String> CHATBOX = new ListView<>();
+    public static ObservableList<String> CHAT_MESSAGES = FXCollections.observableArrayList();
+
+
+    //Start method to set up the stage
     @Override
     public void start(Stage primaryStage) {
         try {
-            socket = new DatagramSocket(CLIENT_PORT);  // create new socket for starting
+            SOCKET = new DatagramSocket(CLIENT_PORT);  // create new socket for starting
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //Sets the title to the stage
+        primaryStage.setTitle(CLIENT_NAME);
 
-        primaryStage.setTitle(nameClient);
-        setupChatWindow(primaryStage, textfield, chat_button, delete_button, chatBox, chatMessages, "MyChat");
+        //Calls the function setupChatWindow with the elements in the variables
+        setupChatWindow(primaryStage, TEXTFIELD, CHAT_BUTTON, DELETE_BUTTON, CHATBOX, CHAT_MESSAGES, "Chat");
 
-        startReceivingMessages(); // starts receiving messages back from the server
+        //Calls the function: startReceivingMessages to receive messages back from the server
+        startReceivingMessages();
     }
 
+    //This function is used to setup the GUI
     private void setupChatWindow(Stage stage, TextField textField, Button sendButton, Button deleteButton, ListView<String> chatBox, ObservableList<String> chatMessages, String title) {
         chatBox.setItems(chatMessages);
 
+        //Event handler for the sending button of the GUI to send messages via click -> calls send_message_via_click function by clicking
         sendButton.setOnAction(event -> {
-            send_message_via_click(textField.getText()); // with this fuction , messages will be sent back
-            textField.clear(); // textfield will be cleared after sending.
+            send_message_via_click(textField.getText());
+            textField.clear(); // clears text field after
         });
 
-
+        //This event handler makes it possible to send messages by a keyboard enter
         textField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
-                send_message_via_click(textField.getText()); // Nachricht senden
-                textField.clear(); // Nach dem Senden Textfeld leeren
+                send_message_via_click(textField.getText());
+                textField.clear();
             }
         });
 
-
+        //This event handler clears the whole chat by clicking the delete button
         deleteButton.setOnAction(event -> {
-            chatMessages.clear(); // all messages in textfield will be closed
+            chatMessages.clear();
             textField.clear();
+            System.out.println("Chat has beeen deleted...");
         });
 
+        //Enables scrolling if the chat window gets to small for the messages
         ScrollPane scrollPane = new ScrollPane(chatBox);
         scrollPane.setFitToWidth(true);
 
+        //Creates VBox for the GUI
         VBox layout = new VBox(10);
         layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(scrollPane, textField, sendButton, deleteButton);
 
+        //Sets up scene for the GUI -> sets width and height
         Scene scene = new Scene(layout, WIDTH, HEIGHT);
         stage.setScene(scene);
         stage.show();
     }
 
+    //Function is called to send messages to the server
     public void send_message_via_click(String message) {
         if (!message.isEmpty()) {
+            //Creates a new thread
             new Thread(() -> {
                 try {
+                    //Creates a needed buffer
                     byte[] buffer = message.getBytes();
 
-                    // Server-IP-Adresse and Port
+                    // To find out the server ip the getServerIp Function is called
                     String serverIp = getServerIp();
                     InetAddress serverAddress = InetAddress.getByName(serverIp);
-                    int port = com.example.chat_assignment.ChatServer_old.SERVER_PORT; // Server-Port
+                    //stores the server port in the variable port
+                    int port = ChatServer.SERVER_PORT;
 
                     DatagramPacket pack = new DatagramPacket(buffer, buffer.length, serverAddress, port);
-                    socket.send(pack);
-                    System.out.println(nameClient + ": " + message);
+                    SOCKET.send(pack);
+                    System.out.println(CLIENT_NAME + ": " + message);
 
 
                 } catch (Exception e) {
@@ -107,33 +130,35 @@ public class ChatClient2 extends Application {
         }
     }
 
-    // asks for server ip
+    // This function gives back the server ip , in this use case its just localhost
     private String getServerIp() {
-        return "localhost"; // should be different in another network especially if its not local
+        return "localhost";
     }
 
-    // Starts a mew Thread, which is waiting for sent back messages of the server -> client
-    private void startReceivingMessages() {
 
+    //This function is used to receive decoded messages back from the server and to update the chat field of the GUI
+    private void startReceivingMessages() {
+        // Starts a new thread
         new Thread(() -> {
             try {
+                //Creates a buffer
                 byte[] buffer = new byte[1024];
-                System.out.println(nameClient + " is ready to receive messages...");
-
                 while (true) {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(packet); // Message receriving from server
+                    SOCKET.receive(packet); // Receiving messages back from the server
 
-
+                    //Encodes the data to string
                     String message = new String(packet.getData(), 0, packet.getLength());
-                    Platform.runLater(() -> chatMessages.add(message)); // Updates GUI
+                    //Updates the GUI
+                    Platform.runLater(() -> CHAT_MESSAGES.add(message)); // Updates GUI
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }).start();
+        }).start(); //Starts the thread
     }
 
+    //Launches the application
     public static void main(String[] args) {
         launch(args);
     }
