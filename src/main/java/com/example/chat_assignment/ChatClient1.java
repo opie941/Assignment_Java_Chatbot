@@ -130,7 +130,7 @@ public class ChatClient1 extends Application {
         }
     }
 
-    // This function gives back the server ip , in this use case its just localhost
+    // This function gives back the server ip-adress, in this use case its just localhost
     private String getServerIp() {
         return "localhost";
     }

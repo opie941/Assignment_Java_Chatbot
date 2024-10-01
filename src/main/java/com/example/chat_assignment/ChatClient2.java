@@ -81,7 +81,7 @@ public class ChatClient2 extends Application {
             }
         });
 
-        //This event handler clears the whole chat by clicking the delete button
+        //This event handler clears the whole chat by clicking the delete_button
         deleteButton.setOnAction(event -> {
             chatMessages.clear();
             textField.clear();
