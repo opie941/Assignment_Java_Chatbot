@@ -28,7 +28,7 @@ public class ChatServer {
 
             //Try/catch block for error-handling
             try {
-                //creating a datagram-socket for the server port, also creating a new needed buffer and a console message for debugging and giving infos
+                //creatin g a datagram-socket for the server port, also creating a new needed buffer and a console message for debugging and giving infos
                 DatagramSocket serverSocket = new DatagramSocket(SERVER_PORT);
                 byte[] receiveBuffer = new byte[1024];
                 System.out.println("Server is listening on local Port: " + SERVER_PORT);
