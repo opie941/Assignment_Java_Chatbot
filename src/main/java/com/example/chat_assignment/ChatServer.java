@@ -12,7 +12,7 @@ public class ChatServer {
     //Defines the port number of the Server
     public static final int SERVER_PORT = 1234;
 
-    //This arraylist is used to store all the clients (numbers) which are chatting
+    //This arraylist is used to store all the clients (numbers) which are chatting together
     private static List<String> CLIENT_LIST = new ArrayList<>();
 
     //main-method of the chatserver
@@ -53,7 +53,7 @@ public class ChatServer {
                     String message = new String(receivePacket.getData(), 0, receivePacket.getLength());
                     System.out.println("Received message from " + clientAddress + ": " + message);
                     //Presents the client list at the console
-                    System.out.println("Current Clientlist: " + CLIENT_LIST);
+                    System.out.println("Current Client list: " + CLIENT_LIST);
 
                     // Stores the message which will later be shown and updated in the GUI in the variable chatMessage
                     String chatMessage = "[" + clientAddress + "]: " + message;
